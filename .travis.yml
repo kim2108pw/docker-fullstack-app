@@ -1,0 +1,24 @@
+language: generic
+
+sudo: required
+
+services:
+    - docker
+
+before_install:
+    - docker build -t kim2108pw/react-fullstack-app-test -f ./frontend/Dockerfile.dev ./frontend
+
+script:
+    - docker run -e CI=true kim2108pw/react-fullstack-app-test npm run test
+   
+after_success:
+    - docker build -t kim2108pw/docker-frontend ./frontend
+    - docker build -t kim2108pw/docker-backend ./backend
+    - docker build -t kim2108pw/docker-nginx ./nginx
+
+    - echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_ID" --password-stdin
+
+    - docker push kim2108pw/docker-frontend
+    - docker push kim2108pw/docker-backend
+    - docker push kim2108pw/docker-nginx
+    
